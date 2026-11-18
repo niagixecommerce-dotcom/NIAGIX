@@ -70,10 +70,41 @@
   let pendingTxImageData = '';
   let pendingProdImageData = '';
 
+  const FIREBASE_DB_URL = 'https://niagix-default-rtdb.asia-southeast1.firebasedatabase.app';
   const TOKEN_KEY = 'niagakira_token';
   const LOCAL_USERS_KEY = 'niagix_local_users_v1';
   const IS_HTTP = location.protocol.startsWith('http');
   const IS_STATIC_HOST = !IS_HTTP || location.hostname.endsWith('github.io');
+
+  function emailToFirebaseKey(email) {
+    const clean = String(email || '').trim().toLowerCase();
+    return btoa(unescape(encodeURIComponent(clean)))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+  }
+
+  async function hashPasswordClient(pw) {
+    const raw = `niagix_salt_${pw}`;
+    if (window.crypto && window.crypto.subtle) {
+      const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    return btoa(unescape(encodeURIComponent(raw)));
+  }
+
+  async function fbRequest(path, method = 'GET', body = null) {
+    const res = await fetch(`${FIREBASE_DB_URL}/${path}.json`, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: body !== null ? JSON.stringify(body) : undefined
+    });
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      throw new Error(`Ralat Firebase (${res.status}): ${errText || 'Gagal berhubung dengan pangkalan data'}`);
+    }
+    return res.json();
+  }
 
   function getAuthToken() {
     return localStorage.getItem(TOKEN_KEY) || '';
@@ -136,7 +167,15 @@
     } catch (e) {
       showToast('Amaran: Storan penuh, cuba buang gambar bersaiz besar.');
     }
-    if (!IS_STATIC_HOST && getAuthToken()) {
+    const token = getAuthToken();
+    if (token.startsWith('fb:')) {
+      const userKey = emailToFirebaseKey(token.slice(3));
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(() => {
+        fbRequest(`users/${userKey}/state`, 'PUT', nextState)
+          .catch((err) => console.warn('Gagal segerak ke Firebase:', err.message));
+      }, 250);
+    } else if (!IS_STATIC_HOST && token) {
       clearTimeout(syncTimer);
       syncTimer = setTimeout(() => {
         apiRequest('/api/state', {
@@ -1658,6 +1697,59 @@
     const password = document.getElementById('authPassword').value;
     const name = document.getElementById('authName').value.trim();
 
+    if (FIREBASE_DB_URL) {
+      if (!email || !password || password.length < 4) {
+        errBox.textContent = 'Sila masukkan emel/nama pengguna dan kata laluan (min 4 aksara).';
+        errBox.classList.remove('hidden');
+        return;
+      }
+      const btn = document.getElementById('authSubmitBtn');
+      const prevBtnText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Menyambung...';
+
+      try {
+        const userKey = emailToFirebaseKey(email);
+        const pwHash = await hashPasswordClient(password);
+        const existing = await fbRequest(`users/${userKey}`, 'GET');
+
+        if (authMode === 'register') {
+          if (existing) {
+            throw new Error('Akaun dengan emel/nama pengguna ini sudah wujud.');
+          }
+          const newState = createDefaultState();
+          newState.profile.ownerName = name || email.split('@')[0];
+          newState.profile.email = email;
+          await fbRequest(`users/${userKey}`, 'PUT', {
+            email,
+            name: newState.profile.ownerName,
+            passwordHash: pwHash,
+            createdAt: new Date().toISOString(),
+            state: newState
+          });
+          localStorage.setItem(TOKEN_KEY, `fb:${email}`);
+          document.getElementById('authForm').reset();
+          showAppShell(newState);
+          showToast('Akaun berjaya didaftarkan & disegerak ke awan!');
+        } else {
+          if (!existing || existing.passwordHash !== pwHash) {
+            throw new Error('Emel/nama pengguna atau kata laluan tidak tepat.');
+          }
+          localStorage.setItem(TOKEN_KEY, `fb:${email}`);
+          document.getElementById('authForm').reset();
+          showAppShell(existing.state || createDefaultState());
+          showToast('Selamat kembali! Data berjaya dimuat turun.');
+        }
+      } catch (err) {
+        errBox.textContent = err.message;
+        errBox.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = prevBtnText;
+      }
+      return;
+    }
+
     if (IS_STATIC_HOST) {
       if (!email || !password || password.length < 4) {
         errBox.textContent = 'Sila masukkan emel/nama pengguna dan kata laluan (min 4 aksara).';
@@ -1763,6 +1855,27 @@
   async function initApp() {
     const token = getAuthToken();
     if (!token) {
+      showAuthScreen();
+      return;
+    }
+    if (token.startsWith('fb:') && FIREBASE_DB_URL) {
+      const email = token.slice(3);
+      const userKey = emailToFirebaseKey(email);
+      try {
+        const remoteState = await fbRequest(`users/${userKey}/state`, 'GET');
+        if (remoteState) {
+          showAppShell(remoteState);
+          return;
+        }
+      } catch (err) {
+        console.warn('Gagal muat turun dari Firebase, guna cache tempatan:', err.message);
+        const cached = loadState();
+        if (cached) {
+          showAppShell(cached);
+          return;
+        }
+      }
+      localStorage.removeItem(TOKEN_KEY);
       showAuthScreen();
       return;
     }
