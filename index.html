@@ -521,6 +521,14 @@
                   <button type="button" class="btn btn-soft" id="btnResetDemo">Kosongkan Semua Data</button>
                 </div>
               </form>
+              <div style="margin-top:18px;padding-top:16px;border-top:1px dashed var(--border);display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+                <span class="muted-label">Sandaran &amp; Pindah Data ke Peranti Lain:</span>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <button type="button" class="btn btn-soft btn-sm" id="btnExportBackup">Eksport Sandaran (.json)</button>
+                  <button type="button" class="btn btn-soft btn-sm" id="btnImportBackup">Import Sandaran</button>
+                  <input type="file" id="importBackupFile" accept=".json,application/json" class="hidden" />
+                </div>
+              </div>
             </div>
           </div>
         </div>

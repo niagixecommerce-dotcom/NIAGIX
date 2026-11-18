@@ -71,10 +71,24 @@
   let pendingProdImageData = '';
 
   const TOKEN_KEY = 'niagakira_token';
+  const LOCAL_USERS_KEY = 'niagix_local_users_v1';
   const IS_HTTP = location.protocol.startsWith('http');
+  const IS_STATIC_HOST = !IS_HTTP || location.hostname.endsWith('github.io');
 
   function getAuthToken() {
     return localStorage.getItem(TOKEN_KEY) || '';
+  }
+
+  function loadLocalUsers() {
+    try {
+      return JSON.parse(localStorage.getItem(LOCAL_USERS_KEY) || '{}');
+    } catch {
+      return {};
+    }
+  }
+
+  function saveLocalUsers(users) {
+    localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users));
   }
 
   async function apiRequest(url, options = {}) {
@@ -84,9 +98,6 @@
     const res = await fetch(url, Object.assign({}, options, { headers }));
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      if (location.hostname.endsWith('github.io')) {
-        throw new Error('GitHub Pages tidak menyokong pelayan Node.js (server.js). Sila deploy repo GitHub ini ke Render, Railway, atau hosting Node.js.');
-      }
       throw new Error(data.error || 'Ralat pelayan');
     }
     return data;
@@ -113,10 +124,19 @@
   function saveState(nextState = state) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+      const token = getAuthToken();
+      if (token.startsWith('local:')) {
+        const email = token.slice(6);
+        const users = loadLocalUsers();
+        if (users[email]) {
+          users[email].state = nextState;
+          saveLocalUsers(users);
+        }
+      }
     } catch (e) {
       showToast('Amaran: Storan penuh, cuba buang gambar bersaiz besar.');
     }
-    if (IS_HTTP && getAuthToken()) {
+    if (!IS_STATIC_HOST && getAuthToken()) {
       clearTimeout(syncTimer);
       syncTimer = setTimeout(() => {
         apiRequest('/api/state', {
@@ -151,7 +171,7 @@
 
   async function uploadOrKeepImage(file, maxSide, onDone) {
     compressImageToDataUrl(file, maxSide, async (dataUrl) => {
-      if (IS_HTTP && getAuthToken()) {
+      if (!IS_STATIC_HOST && getAuthToken()) {
         try {
           const res = await apiRequest('/api/upload', {
             method: 'POST',
@@ -1634,13 +1654,44 @@
     const errBox = document.getElementById('authErrorBox');
     errBox.classList.add('hidden');
 
-    const email = document.getElementById('authEmail').value.trim();
+    const email = document.getElementById('authEmail').value.trim().toLowerCase();
     const password = document.getElementById('authPassword').value;
     const name = document.getElementById('authName').value.trim();
 
-    if (!IS_HTTP) {
-      errBox.textContent = 'Sila jalankan pelayan (node server.js) dan buka melalui http://localhost:3000 untuk log masuk & segerak data.';
-      errBox.classList.remove('hidden');
+    if (IS_STATIC_HOST) {
+      if (!email || !password || password.length < 4) {
+        errBox.textContent = 'Sila masukkan emel/nama pengguna dan kata laluan (min 4 aksara).';
+        errBox.classList.remove('hidden');
+        return;
+      }
+      const users = loadLocalUsers();
+      if (authMode === 'register') {
+        if (users[email]) {
+          errBox.textContent = 'Akaun dengan emel/nama pengguna ini sudah wujud.';
+          errBox.classList.remove('hidden');
+          return;
+        }
+        const newState = createDefaultState();
+        newState.profile.ownerName = name || email.split('@')[0];
+        newState.profile.email = email;
+        users[email] = { email, name: newState.profile.ownerName, password, state: newState };
+        saveLocalUsers(users);
+        localStorage.setItem(TOKEN_KEY, `local:${email}`);
+        document.getElementById('authForm').reset();
+        showAppShell(newState);
+        showToast('Akaun berjaya didaftarkan!');
+      } else {
+        const u = users[email];
+        if (!u || u.password !== password) {
+          errBox.textContent = 'Emel/nama pengguna atau kata laluan tidak tepat.';
+          errBox.classList.remove('hidden');
+          return;
+        }
+        localStorage.setItem(TOKEN_KEY, `local:${email}`);
+        document.getElementById('authForm').reset();
+        showAppShell(u.state);
+        showToast('Selamat kembali!');
+      }
       return;
     }
 
@@ -1661,7 +1712,7 @@
   });
 
   document.getElementById('btnLogout').addEventListener('click', async () => {
-    if (IS_HTTP && getAuthToken()) {
+    if (!IS_STATIC_HOST && getAuthToken()) {
       await apiRequest('/api/logout', { method: 'POST' }).catch(() => {});
     }
     localStorage.removeItem(TOKEN_KEY);
@@ -1671,14 +1722,59 @@
     showToast('Anda telah log keluar.');
   });
 
+  // Backup & Restore (.json)
+  document.getElementById('btnExportBackup').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `niagix-sandaran-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Fail sandaran (.json) berjaya dimuat turun!');
+  });
+
+  document.getElementById('btnImportBackup').addEventListener('click', () => {
+    document.getElementById('importBackupFile').click();
+  });
+
+  document.getElementById('importBackupFile').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const imported = JSON.parse(ev.target.result);
+        if (!imported || typeof imported !== 'object' || !imported.profile) {
+          throw new Error('Format fail sandaran tidak sah.');
+        }
+        state = imported;
+        saveState();
+        renderAll();
+        showToast('Data sandaran berjaya dipulihkan!');
+      } catch (err) {
+        showToast('Gagal mengimport fail: ' + err.message);
+      }
+      e.target.value = '';
+    };
+    reader.readAsText(file);
+  });
+
   async function initApp() {
-    if (!IS_HTTP) {
-      showAppShell(state);
-      return;
-    }
     const token = getAuthToken();
     if (!token) {
       showAuthScreen();
+      return;
+    }
+    if (IS_STATIC_HOST || token.startsWith('local:')) {
+      const email = token.startsWith('local:') ? token.slice(6) : '';
+      const users = loadLocalUsers();
+      if (email && users[email]) {
+        showAppShell(users[email].state);
+      } else {
+        localStorage.removeItem(TOKEN_KEY);
+        showAuthScreen();
+      }
       return;
     }
     try {
