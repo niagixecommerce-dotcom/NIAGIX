@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NIAGIX — Smart Finance • Smarter Business</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- AUTHENTICATION SCREEN (LOGIN / REGISTER) -->
+  <div class="auth-screen" id="authScreen">
+    <div class="auth-card">
+      <div class="auth-brand auth-brand-center">
+        <img src="logo-niagix.jpg" alt="NIAGIX — Smart Finance • Smarter Business" class="auth-logo-banner" />
+      </div>
+
+      <div class="type-switch auth-tabs" style="margin-bottom: 18px;">
+        <button type="button" class="type-pill active" data-auth-mode="login">Log Masuk</button>
+        <button type="button" class="type-pill" data-auth-mode="register">Daftar Akaun</button>
+      </div>
+
+      <div class="auth-error hidden" id="authErrorBox"></div>
+
+      <form id="authForm" class="form-stack">
+        <div class="form-group hidden" id="authNameGroup">
+          <label for="authName">Nama Penuh / Pemilik</label>
+          <input type="text" id="authName" class="input" placeholder="Cth: Mohd Azrulnizam" />
+        </div>
+        <div class="form-group">
+          <label for="authEmail">Emel atau Nama Pengguna</label>
+          <input type="text" id="authEmail" class="input" placeholder="Cth: azrul@niaga.my" required />
+        </div>
+        <div class="form-group">
+          <label for="authPassword">Kata Laluan</label>
+          <input type="password" id="authPassword" class="input" placeholder="Minimum 4 aksara" required />
+        </div>
+        <button type="submit" class="btn btn-primary" id="authSubmitBtn" style="width:100%;justify-content:center;padding:12px;">
+          Log Masuk
+        </button>
+      </form>
+
+      <p class="auth-note">
+        Semua data jualan, produk, perbelanjaan, resit, dan gambar produk disimpan ke akaun anda dan boleh diakses semula di peranti lain.
+      </p>
+    </div>
+  </div>
+
+  <div class="app-shell hidden" id="appShell">
+    <!-- Desktop Sidebar -->
+    <aside class="sidebar" aria-label="Navigasi Utama">
+      <div class="brand">
+        <img src="logo-niagix.jpg" alt="NIAGIX" class="brand-logo-img" />
+        <div>
+          <div class="brand-name">NIAGIX</div>
+          <div class="brand-sub">Smart Finance • Smarter Business</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="home" type="button">
+          <span class="nav-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </span>
+          <span>Utama</span>
+        </button>
+        <button class="nav-item" data-view="products" type="button">
+          <span class="nav-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          </span>
+          <span>Produk</span>
+        </button>
+        <button class="nav-item" data-view="sales" type="button">
+          <span class="nav-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          </span>
+          <span>Jualan</span>
+        </button>
+        <button class="nav-item" data-view="expenses" type="button">
+          <span class="nav-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </span>
+          <span>Perbelanjaan</span>
+        </button>
+        <button class="nav-item" data-view="receipts" type="button">
+          <span class="nav-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </span>
+          <span>Resit &amp; Invois</span>
+        </button>
+        <button class="nav-item" data-view="reports" type="button">
+          <span class="nav-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </span>
+          <span>Laporan Belanja</span>
+        </button>
+        <button class="nav-item" data-view="accounts" type="button">
+          <span class="nav-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          </span>
+          <span>Akaun &amp; Profil</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="biz-pill" id="sidebarBizBadge">
+          <div class="biz-avatar" id="sidebarAvatar">NK</div>
+          <div class="biz-meta">
+            <div class="biz-title" id="sidebarBizName">Kopi &amp; Pastri Kita</div>
+            <div class="biz-ssm" id="sidebarSsm">SSM: 202403112233</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Header -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" id="openQuickActionBtn" type="button" title="Tindakan Pantas" aria-label="Tindakan Pantas">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div>
+            <p class="greeting-sub" id="greetingTime">Selamat sejahtera,</p>
+            <h1 class="greeting-title" id="headerOwnerName">Isha Studio 👋</h1>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="layout-switch" role="group" aria-label="Pilihan Paparan">
+            <button type="button" class="layout-btn active" data-layout="desktop" title="Paparan Desktop">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              <span>Desktop</span>
+            </button>
+            <button type="button" class="layout-btn" data-layout="mobile" title="Paparan Mobile">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+              <span>Mobile</span>
+            </button>
+          </div>
+          <button class="icon-circle-btn" id="btnQuickReceiptHeader" type="button" title="Buat Resit Baru">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          </button>
+          <button class="icon-circle-btn has-dot" id="btnNotifications" type="button" title="Notifikasi">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </button>
+          <button class="avatar-btn" data-view-jump="accounts" type="button" title="Profil Perniagaan">
+            <span id="headerAvatarText">IS</span>
+          </button>
+          <button class="btn btn-soft btn-sm" id="btnLogout" type="button" title="Log Keluar">Log Keluar</button>
+        </div>
+      </header>
+
+      <!-- VIEW 1: UTAMA (DASHBOARD) -->
+      <section class="view active" id="view-home">
+        <div class="dashboard-grid">
+          <!-- Left Column -->
+          <div class="col-stack">
+            <!-- Hero Purple Gradient Balance Card -->
+            <div class="hero-card">
+              <div class="hero-card-glow"></div>
+              <div class="hero-card-top">
+                <div>
+                  <span class="hero-label">Jumlah Baki Perniagaan</span>
+                  <div class="hero-balance" id="heroTotalBalance">RM 0.00</div>
+                </div>
+                <div class="card-chip" aria-hidden="true">
+                  <svg width="34" height="26" viewBox="0 0 34 26" fill="none">
+                    <rect x="0.5" y="0.5" width="33" height="25" rx="5.5" fill="white" fill-opacity="0.22" stroke="white" stroke-opacity="0.45"/>
+                    <path d="M11 1V25M23 1V25M1 9H11M23 9H33M1 17H11M23 17H33" stroke="white" stroke-opacity="0.45"/>
+                  </svg>
+                </div>
+              </div>
+
+              <div class="hero-card-bottom">
+                <div>
+                  <span class="hero-sub-label">Untung Bersih (Bulan Ini)</span>
+                  <div class="hero-sub-value" id="heroNetProfit">RM 0.00</div>
+                </div>
+                <div class="hero-pills">
+                  <div class="hero-stat-mini">
+                    <span class="dot-in"></span>
+                    <span>Masuk: <strong id="heroMonthIncome">RM 0</strong></span>
+                  </div>
+                  <div class="hero-stat-mini">
+                    <span class="dot-out"></span>
+                    <span>Keluar: <strong id="heroMonthExpense">RM 0</strong></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4 Pastel Quick Actions -->
+            <div class="quick-actions">
+              <button class="qa-item" id="qaAddIncome" type="button">
+                <div class="qa-icon qa-purple">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                </div>
+                <span>Rekod Jualan</span>
+              </button>
+              <button class="qa-item" id="qaAddExpense" type="button">
+                <div class="qa-icon qa-pink">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+                </div>
+                <span>Rekod Belanja</span>
+              </button>
+              <button class="qa-item" id="qaNewReceipt" type="button">
+                <div class="qa-icon qa-peach">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                </div>
+                <span>Buat Resit</span>
+              </button>
+              <button class="qa-item" data-view-jump="reports" type="button">
+                <div class="qa-icon qa-indigo">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                </div>
+                <span>Laporan</span>
+              </button>
+            </div>
+
+            <!-- Spending Overview Donut Card -->
+            <div class="card">
+              <div class="card-header">
+                <h2>Ringkasan Perbelanjaan</h2>
+                <button class="link-btn" data-view-jump="reports" type="button">Lihat Laporan</button>
+              </div>
+              <div class="donut-layout">
+                <div class="donut-wrap" id="homeDonutChart"></div>
+                <div class="donut-legend" id="homeDonutLegend"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column -->
+          <div class="col-stack">
+            <!-- Recent Transactions Card -->
+            <div class="card">
+              <div class="card-header">
+                <h2>Transaksi Terkini</h2>
+                <button class="link-btn" data-view-jump="sales" type="button">Lihat Jualan</button>
+              </div>
+              <div class="tx-list" id="homeRecentTx"></div>
+            </div>
+
+            <!-- Recent Receipts Mini Card -->
+            <div class="card">
+              <div class="card-header">
+                <h2>Resit Terkini</h2>
+                <button class="link-btn" data-view-jump="receipts" type="button">Urus Resit</button>
+              </div>
+              <div class="tx-list" id="homeRecentReceipts"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 2A: DAFTAR PRODUK -->
+      <section class="view" id="view-products">
+        <div class="view-toolbar">
+          <div>
+            <h2 class="section-heading">Daftar Produk &amp; Servis</h2>
+            <p class="section-sub">Urus senarai produk dan harga jualan anda. Produk di sini akan dipaparkan dalam rekod jualan.</p>
+          </div>
+          <div class="toolbar-actions">
+            <button class="btn btn-primary" id="btnOpenAddProduct" type="button">+ Tambah Produk</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>Senarai Produk &amp; Servis</h2>
+            <span class="muted-label" id="productsCountLabel">0 produk</span>
+          </div>
+          <div class="products-grid" id="productsGrid"></div>
+        </div>
+      </section>
+
+      <!-- VIEW 2B: JUALAN -->
+      <section class="view" id="view-sales">
+        <div class="view-toolbar">
+          <div>
+            <h2 class="section-heading">Rekod Jualan</h2>
+            <p class="section-sub">Pantau semua jualan masuk daripada daftar produk anda dan jana resit pelanggan.</p>
+          </div>
+          <div class="toolbar-actions">
+            <button class="btn btn-soft" id="btnExportSalesCsv" type="button">Eksport CSV</button>
+            <button class="btn btn-primary" id="btnOpenAddSale" type="button">+ Rekod Jualan</button>
+          </div>
+        </div>
+
+        <!-- Tapisan & Senarai Jualan -->
+        <div class="card filter-card">
+          <div class="filter-row filter-row-3">
+            <input type="search" id="salesSearch" class="input" placeholder="Cari produk, pelanggan, atau penerangan jualan..." />
+            <select id="salesFilterCategory" class="input select-sm">
+              <option value="all">Semua Kategori Jualan</option>
+            </select>
+            <select id="salesFilterMonth" class="input select-sm">
+              <option value="all">Semua Bulan</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="summary-strip" id="salesSummaryStrip"></div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>Rekod Jualan Masuk</h2>
+          </div>
+          <div class="tx-list" id="salesList"></div>
+        </div>
+      </section>
+
+      <!-- VIEW 2B: PERBELANJAAN -->
+      <section class="view" id="view-expenses">
+        <div class="view-toolbar">
+          <div>
+            <h2 class="section-heading">Pengurusan Perbelanjaan</h2>
+            <p class="section-sub">Rekod semua kos stok, operasi, pengangkutan, gaji, dan lampiran resit pembelian.</p>
+          </div>
+          <div class="toolbar-actions">
+            <button class="btn btn-soft" id="btnExportExpensesCsv" type="button">Eksport CSV</button>
+            <button class="btn btn-primary" id="btnOpenAddExpense" type="button">+ Rekod Perbelanjaan</button>
+          </div>
+        </div>
+
+        <div class="card filter-card">
+          <div class="filter-row filter-row-3">
+            <input type="search" id="expSearch" class="input" placeholder="Cari pembekal, bil, atau catatan perbelanjaan..." />
+            <select id="expFilterCategory" class="input select-sm">
+              <option value="all">Semua Kategori Belanja</option>
+            </select>
+            <select id="expFilterMonth" class="input select-sm">
+              <option value="all">Semua Bulan</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="summary-strip" id="expSummaryStrip"></div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>Rekod Perbelanjaan</h2>
+          </div>
+          <div class="tx-list" id="expensesList"></div>
+        </div>
+      </section>
+
+      <!-- VIEW 3: RESIT & INVOIS -->
+      <section class="view" id="view-receipts">
+        <div class="view-toolbar">
+          <div>
+            <h2 class="section-heading">Resit Rasmi Perniagaan</h2>
+            <p class="section-sub">Jana resit profesional untuk pelanggan, cetak PDF, atau salin terus ke WhatsApp.</p>
+          </div>
+          <div class="toolbar-actions">
+            <button class="btn btn-primary" id="btnCreateReceipt" type="button">+ Bina Resit Baru</button>
+          </div>
+        </div>
+
+        <div class="receipts-grid" id="receiptsListGrid"></div>
+      </section>
+
+      <!-- VIEW 4: LAPORAN PERBELANJAAN & STATISTIK -->
+      <section class="view" id="view-reports">
+        <!-- Print-Only Official Report Letterhead -->
+        <div class="print-report-header" id="printReportHeader"></div>
+
+        <div class="view-toolbar">
+          <div>
+            <h2 class="section-heading">Statistik &amp; Pelaporan Perbelanjaan</h2>
+            <p class="section-sub">Analisis aliran tunai, pecahan kategori belanja, dan penyata untung rugi.</p>
+          </div>
+          <div class="toolbar-actions">
+            <select id="reportPeriod" class="input select-sm">
+              <option value="this_month">Bulan Ini</option>
+              <option value="last_month">Bulan Lepas</option>
+              <option value="last_90">3 Bulan Terakhir</option>
+              <option value="all">Semua Masa</option>
+            </select>
+            <button class="btn btn-soft" id="btnPrintReport" type="button">Cetak Penyata</button>
+            <button class="btn btn-primary" id="btnExportReportCsv" type="button">Eksport Laporan CSV</button>
+          </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid" id="reportKpiGrid"></div>
+
+        <div class="dashboard-grid">
+          <!-- Area Chart Card (Matching Reference Statistics Screen) -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <span class="muted-label">Trend Perbelanjaan</span>
+                <div class="big-stat" id="reportTotalSpendBig">RM 0.00</div>
+                <div class="delta-badge" id="reportSpendDelta"></div>
+              </div>
+              <div class="chart-toggle">
+                <button class="pill-tab active" data-chart-mode="expense" type="button">Belanja</button>
+                <button class="pill-tab" data-chart-mode="income" type="button">Jualan</button>
+              </div>
+            </div>
+            <div class="area-chart-wrap" id="reportAreaChart"></div>
+          </div>
+
+          <!-- Category Breakdown (Matching Reference Categories Progress Bars) -->
+          <div class="card">
+            <div class="card-header">
+              <h2>Kategori Perbelanjaan</h2>
+              <span class="muted-label" id="reportCatCount">0 kategori</span>
+            </div>
+            <div class="cat-progress-list" id="reportCategoryBars"></div>
+          </div>
+        </div>
+
+        <!-- Profit & Loss Summary Table -->
+        <div class="card" style="margin-top: 20px;">
+          <div class="card-header">
+            <h2>Penyata Untung Rugi Ringkas (P&amp;L)</h2>
+            <span class="muted-label" id="plPeriodLabel">Bulan Ini</span>
+          </div>
+          <div class="table-wrap">
+            <table class="pl-table" id="plTable"></table>
+          </div>
+        </div>
+
+        <!-- Print-Only Signature & Verification Footer -->
+        <div class="print-report-footer" id="printReportFooter"></div>
+      </section>
+
+      <!-- VIEW 5: AKAUN, KAD & PROFIL PERNIAGAAN -->
+      <section class="view" id="view-accounts">
+        <div class="view-toolbar">
+          <div>
+            <h2 class="section-heading">Akaun Bank, Kad &amp; Profil</h2>
+            <p class="section-sub">Urus kaedah bayaran perniagaan dan maklumat syarikat untuk paparan pada resit.</p>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <!-- Left: My Cards (Matching Reference My Cards Screen) -->
+          <div class="col-stack">
+            <div class="card">
+              <div class="card-header">
+                <h2>Kad &amp; Akaun Perniagaan</h2>
+                <button class="icon-circle-btn sm" id="btnAddAccount" type="button" title="Tambah Akaun">+</button>
+              </div>
+
+              <div class="visa-card" id="activeAccountCard">
+                <div class="visa-top">
+                  <span class="visa-bank" id="cardBankName">Maybank SME</span>
+                  <span class="visa-brand">VISA</span>
+                </div>
+                <div class="visa-number" id="cardNumberMask">•••• •••• •••• 5678</div>
+                <div class="visa-bottom">
+                  <div>
+                    <div class="visa-meta-label">Baki Akaun</div>
+                    <div class="visa-meta-val" id="cardBalanceVal">RM 0.00</div>
+                  </div>
+                  <div>
+                    <div class="visa-meta-label">Pemegang</div>
+                    <div class="visa-meta-val" id="cardHolderName">Isha Studio</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="account-selector" id="accountSelectorPills"></div>
+
+              <div class="toggle-list" id="cardSettingsToggles"></div>
+            </div>
+          </div>
+
+          <!-- Right: Business Profile Form -->
+          <div class="col-stack">
+            <div class="card">
+              <div class="card-header">
+                <h2>Maklumat Perniagaan (Untuk Resit)</h2>
+              </div>
+              <form id="bizProfileForm" class="form-stack">
+                <div class="form-group">
+                  <label for="profBizName">Nama Perniagaan / Syarikat</label>
+                  <input type="text" id="profBizName" class="input" required />
+                </div>
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label for="profOwner">Nama Pemilik</label>
+                    <input type="text" id="profOwner" class="input" required />
+                  </div>
+                  <div class="form-group">
+                    <label for="profSsm">No. Pendaftaran SSM</label>
+                    <input type="text" id="profSsm" class="input" />
+                  </div>
+                </div>
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label for="profPhone">No. Telefon / WhatsApp</label>
+                    <input type="text" id="profPhone" class="input" />
+                  </div>
+                  <div class="form-group">
+                    <label for="profEmail">Emel Perniagaan</label>
+                    <input type="email" id="profEmail" class="input" />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="profAddress">Alamat Perniagaan</label>
+                  <textarea id="profAddress" class="input" rows="2"></textarea>
+                </div>
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label for="profReceiptPrefix">Awalan No. Resit</label>
+                    <input type="text" id="profReceiptPrefix" class="input" placeholder="RES" />
+                  </div>
+                  <div class="form-group">
+                    <label for="profBudgetLimit">Had Bajet Belanja Bulanan (RM)</label>
+                    <input type="number" id="profBudgetLimit" class="input" min="0" step="50" />
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary">Simpan Profil</button>
+                  <button type="button" class="btn btn-soft" id="btnResetDemo">Kosongkan Semua Data</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Mobile Bottom Navigation (Matching Reference Image) -->
+    <nav class="bottom-nav" aria-label="Navigasi Mudah Alih">
+      <button class="bnav-item active" data-view="home" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Utama</span>
+      </button>
+      <button class="bnav-item" data-view="products" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        <span>Produk</span>
+      </button>
+      <button class="bnav-item" data-view="sales" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span>Jualan</span>
+      </button>
+      <button class="bnav-item" data-view="expenses" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span>Belanja</span>
+      </button>
+      <button class="bnav-item" data-view="receipts" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>Resit</span>
+      </button>
+      <button class="bnav-item" data-view="reports" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Laporan</span>
+      </button>
+      <button class="bnav-item" data-view="accounts" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        <span>Akaun</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- MODAL: TAMBAH / EDIT TRANSAKSI -->
+  <div class="modal-backdrop" id="txModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="txModalTitle">Rekod Transaksi Baru</h3>
+        <button class="close-btn" data-close-modal="txModal" type="button">&times;</button>
+      </div>
+      <form id="txForm" class="form-stack">
+        <input type="hidden" id="txId" />
+        <div class="type-switch" id="txTypeSwitch" style="display:none;">
+          <button type="button" class="type-pill active" data-tx-type="income">Jualan (Masuk)</button>
+          <button type="button" class="type-pill" data-tx-type="expense">Perbelanjaan (Keluar)</button>
+        </div>
+
+        <div class="form-row-2" id="txProductPickerWrap">
+          <div class="form-group">
+            <label for="txProductSelect">Pilih Produk (Daftar Produk)</label>
+            <select id="txProductSelect" class="input">
+              <option value="">-- Pilih Produk --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="txQty">Kuantiti</label>
+            <input type="number" id="txQty" class="input" min="1" step="1" value="1" />
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="txAmount">Jumlah (RM)</label>
+            <input type="number" id="txAmount" class="input" step="0.01" min="0.01" placeholder="0.00" required />
+          </div>
+          <div class="form-group">
+            <label for="txDate">Tarikh</label>
+            <input type="date" id="txDate" class="input" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="txTitle" id="txTitleLabel">Penerangan / Nama Pelanggan</label>
+          <input type="text" id="txTitle" class="input" placeholder="Cth: Nama pelanggan atau item jualan" required />
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="txCategory">Kategori</label>
+            <select id="txCategory" class="input" required></select>
+          </div>
+          <div class="form-group">
+            <label for="txAccount">Akaun / Kaedah</label>
+            <select id="txAccount" class="input" required></select>
+          </div>
+        </div>
+
+        <div class="form-group" id="txReceiptUploadGroup">
+          <label for="txReceiptImage">Muat Naik Gambar Resit Pembelian (Pilihan)</label>
+          <input type="file" id="txReceiptImage" class="input file-input" accept="image/*" />
+          <div id="txImagePreviewWrap" class="img-preview-wrap hidden">
+            <img id="txImagePreview" alt="Pratonton Resit" />
+            <button type="button" class="btn-xs-danger" id="btnRemoveTxImg">Buang Gambar</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="txNotes">Nota Tambahan</label>
+          <input type="text" id="txNotes" class="input" placeholder="No. rujukan atau catatan ringkas..." />
+        </div>
+
+        <label class="checkbox-row" id="txAutoReceiptWrap">
+          <input type="checkbox" id="txAutoReceipt" />
+          <span>Jana resit rasmi secara automatik selepas jualan disimpan</span>
+        </label>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-soft" data-close-modal="txModal">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Transaksi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: TAMBAH / EDIT PRODUK -->
+  <div class="modal-backdrop" id="productModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="productModalTitle">Tambah Produk / Servis Baru</h3>
+        <button class="close-btn" data-close-modal="productModal" type="button">&times;</button>
+      </div>
+      <form id="productForm" class="form-stack">
+        <input type="hidden" id="prodId" />
+        <div class="form-group">
+          <label for="prodName">Nama Produk / Servis</label>
+          <input type="text" id="prodName" class="input" placeholder="Cth: Nasi Kerabu Ayam Bakar / Kek Batik" required />
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="prodPrice">Harga Jualan (RM)</label>
+            <input type="number" id="prodPrice" class="input" step="0.01" min="0.01" placeholder="0.00" required />
+          </div>
+          <div class="form-group">
+            <label for="prodCategory">Kategori Jualan</label>
+            <select id="prodCategory" class="input" required></select>
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="prodUnit">Unit / Saiz (Pilihan)</label>
+            <input type="text" id="prodUnit" class="input" placeholder="Cth: pek, kotak, jam, unit" />
+          </div>
+          <div class="form-group">
+            <label for="prodEmoji">Ikon Emoji</label>
+            <input type="text" id="prodEmoji" class="input" value="🛍️" maxlength="4" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="prodImage">Muat Naik Gambar Produk (Pilihan)</label>
+          <input type="file" id="prodImage" class="input file-input" accept="image/*" />
+          <div id="prodImagePreviewWrap" class="img-preview-wrap hidden">
+            <img id="prodImagePreview" alt="Pratonton Produk" />
+            <button type="button" class="btn-xs-danger" id="btnRemoveProdImg">Buang Gambar</button>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-soft" data-close-modal="productModal">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Produk</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: BINA RESIT BARU -->
+  <div class="modal-backdrop" id="receiptFormModal" aria-hidden="true">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <h3>Bina Resit Rasmi</h3>
+        <button class="close-btn" data-close-modal="receiptFormModal" type="button">&times;</button>
+      </div>
+      <form id="receiptForm" class="form-stack">
+        <input type="hidden" id="recLinkedTxId" />
+        <div class="form-group" id="recFromSaleWrap">
+          <label for="recFromSaleSelect">Jana Daripada Rekod Jualan Masuk (Pilihan)</label>
+          <select id="recFromSaleSelect" class="input">
+            <option value="">-- Masukkan butiran manual --</option>
+          </select>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="recCustomerName">Nama Pelanggan / Syarikat</label>
+            <input type="text" id="recCustomerName" class="input" placeholder="Cth: Cikgu Aminah / Kafe Harmoni" required />
+          </div>
+          <div class="form-group">
+            <label for="recCustomerPhone">No. Telefon Pelanggan</label>
+            <input type="text" id="recCustomerPhone" class="input" placeholder="012-3456789" />
+          </div>
+        </div>
+
+        <div class="form-row-3">
+          <div class="form-group">
+            <label for="recDate">Tarikh Resit</label>
+            <input type="date" id="recDate" class="input" required />
+          </div>
+          <div class="form-group">
+            <label for="recMethod">Kaedah Bayaran</label>
+            <select id="recMethod" class="input">
+              <option value="DuitNow QR">DuitNow QR</option>
+              <option value="Pemindahan Bank">Pemindahan Bank</option>
+              <option value="Tunai">Tunai</option>
+              <option value="Kad Kredit/Debit">Kad Kredit/Debit</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="recStatus">Status Bayaran</label>
+            <select id="recStatus" class="input">
+              <option value="paid">Dibayar Penuh</option>
+              <option value="unpaid">Belum Dibayar</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="items-section">
+          <div class="items-header">
+            <span>Senarai Item / Servis</span>
+            <button type="button" class="btn btn-soft btn-sm" id="btnAddReceiptItem">+ Tambah Item</button>
+          </div>
+          <div id="receiptItemsContainer" class="receipt-items-rows"></div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="recDiscount">Diskaun (RM)</label>
+            <input type="number" id="recDiscount" class="input" value="0" min="0" step="0.01" />
+          </div>
+          <div class="form-group">
+            <label for="recTax">Cukai / SST (%)</label>
+            <input type="number" id="recTax" class="input" value="0" min="0" max="100" step="0.5" />
+          </div>
+        </div>
+
+        <div class="receipt-total-bar">
+          <span>Jumlah Keseluruhan Resit</span>
+          <strong id="recGrandTotalPreview">RM 0.00</strong>
+        </div>
+
+        <label class="checkbox-row">
+          <input type="checkbox" id="recAutoRecordTx" checked />
+          <span>Rekod automatik ke dalam Buku Tunai (Jualan) jika status "Dibayar Penuh"</span>
+        </label>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-soft" data-close-modal="receiptFormModal">Batal</button>
+          <button type="submit" class="btn btn-primary">Jana &amp; Simpan Resit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: PRATONTON & CETAK RESIT -->
+  <div class="modal-backdrop" id="receiptPreviewModal" aria-hidden="true">
+    <div class="modal-card modal-lg">
+      <div class="modal-header no-print">
+        <h3>Pratonton Resit Rasmi</h3>
+        <button class="close-btn" data-close-modal="receiptPreviewModal" type="button">&times;</button>
+      </div>
+      <div id="printableReceiptArea" class="printable-receipt"></div>
+      <div class="form-actions no-print" style="margin-top: 16px;">
+        <button type="button" class="btn btn-soft" id="btnCopyWhatsappReceipt">Salin Teks WhatsApp</button>
+        <button type="button" class="btn btn-primary" id="btnPrintReceiptNow">Cetak / Simpan PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: LIHAT GAMBAR RESIT -->
+  <div class="modal-backdrop" id="imageViewerModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Lampiran Resit</h3>
+        <button class="close-btn" data-close-modal="imageViewerModal" type="button">&times;</button>
+      </div>
+      <div class="viewer-body">
+        <img id="viewerImg" alt="Gambar Resit" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
