@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=3" />
 </head>
 <body>
   <!-- AUTHENTICATION SCREEN (LOGIN / REGISTER) -->
@@ -45,6 +45,7 @@
       <p class="auth-note">
         Semua data jualan, produk, perbelanjaan, resit, dan gambar produk disimpan ke akaun anda dan boleh diakses semula di peranti lain.
       </p>
+      <p class="auth-note" id="cloudStatusIndicator" style="margin-top:6px;font-weight:700;color:var(--primary);"></p>
     </div>
   </div>
 
@@ -815,6 +816,6 @@
   <!-- Toast Notification -->
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>

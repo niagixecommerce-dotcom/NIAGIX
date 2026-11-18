@@ -1853,6 +1853,10 @@
   });
 
   async function initApp() {
+    const statusEl = document.getElementById('cloudStatusIndicator');
+    if (statusEl) {
+      statusEl.textContent = FIREBASE_DB_URL ? '☁️ Cloud Sync Aktif (v3)' : 'Storan Tempatan';
+    }
     const token = getAuthToken();
     if (!token) {
       showAuthScreen();
