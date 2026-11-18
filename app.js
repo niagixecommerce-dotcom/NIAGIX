@@ -84,6 +84,9 @@
     const res = await fetch(url, Object.assign({}, options, { headers }));
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
+      if (location.hostname.endsWith('github.io')) {
+        throw new Error('GitHub Pages tidak menyokong pelayan Node.js (server.js). Sila deploy repo GitHub ini ke Render, Railway, atau hosting Node.js.');
+      }
       throw new Error(data.error || 'Ralat pelayan');
     }
     return data;
