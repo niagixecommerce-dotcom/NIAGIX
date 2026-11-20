@@ -1122,7 +1122,7 @@
     const p = state.profile;
 
     document.getElementById('printableReceiptArea').innerHTML = `
-      ${p.logo ? `<div class="pr-logo-center"><img src="${p.logo}" alt="Logo ${escapeHtml(p.bizName)}" /></div>` : ''}
+      ${p.logo ? `<div class="pr-logo-center" style="text-align:center;margin-bottom:12px;"><img src="${p.logo}" alt="Logo ${escapeHtml(p.bizName)}" style="max-height:52px;max-width:130px;width:auto;height:auto;object-fit:contain;display:inline-block;border-radius:8px;" /></div>` : ''}
       <div class="pr-header">
         <div>
           <div class="pr-biz-name">${escapeHtml(p.bizName)}</div>
