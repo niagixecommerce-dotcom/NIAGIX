@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=4" />
+  <link rel="stylesheet" href="styles.css?v=5" />
 </head>
 <body>
   <!-- AUTHENTICATION SCREEN (LOGIN / REGISTER) -->
@@ -380,6 +380,9 @@
               <option value="last_90">3 Bulan Terakhir</option>
               <option value="all">Semua Masa</option>
             </select>
+            <select id="reportProductFilter" class="input select-sm">
+              <option value="all">Semua Produk</option>
+            </select>
             <button class="btn btn-soft" id="btnPrintReport" type="button">Cetak Penyata</button>
             <button class="btn btn-primary" id="btnExportReportCsv" type="button">Eksport Laporan CSV</button>
           </div>
@@ -413,6 +416,15 @@
             </div>
             <div class="cat-progress-list" id="reportCategoryBars"></div>
           </div>
+        </div>
+
+        <!-- Jualan Mengikut Produk -->
+        <div class="card" style="margin-top: 20px;">
+          <div class="card-header">
+            <h2>Laporan Jualan Mengikut Produk</h2>
+            <span class="muted-label" id="reportProdCount">0 produk</span>
+          </div>
+          <div class="cat-progress-list" id="reportProductBars"></div>
         </div>
 
         <!-- Profit & Loss Summary Table -->
@@ -814,6 +826,6 @@
   <!-- Toast Notification -->
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>

@@ -1210,15 +1210,89 @@
     return state.transactions;
   }
 
+  function matchTxToProduct(tx, prod) {
+    if (!tx || tx.type !== 'income' || !prod) return false;
+    if (tx.productId && tx.productId === prod.id) return true;
+    const lowTitle = String(tx.title || '').toLowerCase();
+    const lowProd = String(prod.name || '').toLowerCase();
+    return Boolean(lowProd && lowTitle.includes(lowProd));
+  }
+
+  function renderProductSalesBars(incomeTxs) {
+    const container = document.getElementById('reportProductBars');
+    if (!container) return;
+
+    const totalInc = incomeTxs.reduce((s, t) => s + Number(t.amount), 0);
+    const byProd = {};
+
+    incomeTxs.forEach(t => {
+      const matched = state.products.find(p => matchTxToProduct(t, p));
+      const key = matched ? matched.id : '__other__';
+      if (!byProd[key]) {
+        byProd[key] = {
+          name: matched ? matched.name : (t.title || 'Jualan Lain'),
+          emoji: matched ? (matched.emoji || '🛍️') : '💰',
+          image: matched ? (matched.image || '') : '',
+          prefix: matched ? (matched.receiptPrefix || state.profile.receiptPrefix || 'RES') : '',
+          total: 0,
+          count: 0
+        };
+      }
+      byProd[key].total += Number(t.amount);
+      byProd[key].count += 1;
+    });
+
+    const sorted = Object.values(byProd).sort((a, b) => b.total - a.total);
+    const countEl = document.getElementById('reportProdCount');
+    if (countEl) countEl.textContent = `${sorted.length} produk`;
+
+    if (!sorted.length) {
+      container.innerHTML = `<div class="empty-state">Tiada jualan produk direkodkan dalam tempoh ini.</div>`;
+      return;
+    }
+
+    container.innerHTML = sorted.map(item => {
+      const pct = totalInc > 0 ? Math.round((item.total / totalInc) * 100) : 0;
+      return `
+        <div class="cat-prog-item">
+          <div class="tx-badge" style="background:#EDE8FE;overflow:hidden;">
+            ${item.image ? `<img src="${item.image}" class="prod-thumb" alt="${escapeHtml(item.name)}" />` : escapeHtml(item.emoji)}
+          </div>
+          <div class="cat-prog-body">
+            <div class="cat-prog-top">
+              <span>${escapeHtml(item.name)} <span class="cat-prog-sub">(${item.count} jualan · ${pct}%${item.prefix ? ` · ${escapeHtml(item.prefix)}` : ''})</span></span>
+              <span style="color:var(--success)">${rm(item.total)}</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" style="width:${pct}%; background:var(--primary)"></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
   function renderReportsView() {
     const period = document.getElementById('reportPeriod').value;
+    const prodSelect = document.getElementById('reportProductFilter');
+    const prevProd = prodSelect ? prodSelect.value : 'all';
+    if (prodSelect) {
+      prodSelect.innerHTML = `<option value="all">Semua Produk</option>` +
+        state.products.map(p => `<option value="${p.id}">${escapeHtml(p.emoji || '🛍️')} ${escapeHtml(p.name)} (${escapeHtml(p.receiptPrefix || state.profile.receiptPrefix || 'RES')})</option>`).join('');
+      prodSelect.value = state.products.some(p => p.id === prevProd) ? prevProd : 'all';
+    }
+    const selectedProdId = prodSelect ? prodSelect.value : 'all';
+    const selectedProd = selectedProdId !== 'all' ? state.products.find(p => p.id === selectedProdId) : null;
+
     const periodLabelMap = {
       this_month: 'Bulan Ini',
       last_month: 'Bulan Lepas',
       last_90: '3 Bulan Terakhir',
       all: 'Semua Masa'
     };
-    const periodLabel = periodLabelMap[period];
+    const periodLabel = selectedProd
+      ? `${periodLabelMap[period]} · ${selectedProd.name}`
+      : periodLabelMap[period];
     document.getElementById('plPeriodLabel').textContent = periodLabel;
 
     const p = state.profile;
@@ -1254,7 +1328,10 @@
       </div>
     `;
 
-    const txs = getPeriodTransactions(period);
+    const periodTxs = getPeriodTransactions(period);
+    const txs = selectedProd
+      ? periodTxs.filter(t => t.type === 'income' && matchTxToProduct(t, selectedProd))
+      : periodTxs;
     const income = txs.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
     const expense = txs.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
     const net = income - expense;
@@ -1283,6 +1360,7 @@
 
     renderAreaChart(modeTxs);
     renderCategoryBars(txs.filter(t => t.type === 'expense'), expense);
+    renderProductSalesBars(txs.filter(t => t.type === 'income'));
     renderPLTable(txs, income, expense, net);
   }
 
@@ -1570,6 +1648,7 @@
   });
 
   document.getElementById('reportPeriod').addEventListener('change', renderReportsView);
+  document.getElementById('reportProductFilter').addEventListener('change', renderReportsView);
   document.querySelectorAll('[data-chart-mode]').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('[data-chart-mode]').forEach(b => b.classList.remove('active'));
