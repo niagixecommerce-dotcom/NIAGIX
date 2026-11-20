@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=3" />
+  <link rel="stylesheet" href="styles.css?v=4" />
 </head>
 <body>
   <!-- AUTHENTICATION SCREEN (LOGIN / REGISTER) -->
@@ -507,15 +507,9 @@
                   <label for="profAddress">Alamat Perniagaan</label>
                   <textarea id="profAddress" class="input" rows="2"></textarea>
                 </div>
-                <div class="form-row-2">
-                  <div class="form-group">
-                    <label for="profReceiptPrefix">Awalan No. Resit</label>
-                    <input type="text" id="profReceiptPrefix" class="input" placeholder="RES" />
-                  </div>
-                  <div class="form-group">
-                    <label for="profBudgetLimit">Had Bajet Belanja Bulanan (RM)</label>
-                    <input type="number" id="profBudgetLimit" class="input" min="0" step="50" />
-                  </div>
+                <div class="form-group">
+                  <label for="profBudgetLimit">Had Bajet Belanja Bulanan (RM)</label>
+                  <input type="number" id="profBudgetLimit" class="input" min="0" step="50" />
                 </div>
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary">Simpan Profil</button>
@@ -679,9 +673,13 @@
             <input type="text" id="prodUnit" class="input" placeholder="Cth: pek, kotak, jam, unit" />
           </div>
           <div class="form-group">
-            <label for="prodEmoji">Ikon Emoji</label>
-            <input type="text" id="prodEmoji" class="input" value="🛍️" maxlength="4" />
+            <label for="prodReceiptPrefix">Awalan No. Resit Produk</label>
+            <input type="text" id="prodReceiptPrefix" class="input" placeholder="Cth: PEN / KEK" maxlength="10" style="text-transform:uppercase;" required />
           </div>
+        </div>
+        <div class="form-group">
+          <label for="prodEmoji">Ikon Emoji</label>
+          <input type="text" id="prodEmoji" class="input" value="🛍️" maxlength="4" />
         </div>
         <div class="form-group">
           <label for="prodImage">Muat Naik Gambar Produk (Pilihan)</label>
@@ -816,6 +814,6 @@
   <!-- Toast Notification -->
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

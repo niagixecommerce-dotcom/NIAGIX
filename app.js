@@ -516,7 +516,7 @@
         </div>
         <div>
           <div class="prod-name">${escapeHtml(p.name)}</div>
-          <div class="prod-cat">${escapeHtml(p.category)}</div>
+          <div class="prod-cat">${escapeHtml(p.category)} · Kod Resit: <strong>${escapeHtml(p.receiptPrefix || state.profile.receiptPrefix || 'RES')}</strong></div>
         </div>
         <div class="prod-price">${rm(p.price)} ${p.unit ? `<span class="prod-unit">/ ${escapeHtml(p.unit)}</span>` : ''}</div>
         <div class="prod-actions">
@@ -741,6 +741,7 @@
       document.getElementById('prodPrice').value = prodToEdit.price;
       document.getElementById('prodCategory').value = prodToEdit.category;
       document.getElementById('prodUnit').value = prodToEdit.unit || '';
+      document.getElementById('prodReceiptPrefix').value = prodToEdit.receiptPrefix || 'RES';
       document.getElementById('prodEmoji').value = prodToEdit.emoji || '🛍️';
       if (prodToEdit.image) {
         pendingProdImageData = prodToEdit.image;
@@ -750,6 +751,7 @@
     } else {
       document.getElementById('productModalTitle').textContent = 'Tambah Produk / Servis Baru';
       document.getElementById('prodId').value = '';
+      document.getElementById('prodReceiptPrefix').value = '';
       document.getElementById('prodEmoji').value = '🛍️';
     }
     openModal('productModal');
@@ -780,6 +782,7 @@
       price: parseFloat(document.getElementById('prodPrice').value) || 0,
       category: document.getElementById('prodCategory').value,
       unit: document.getElementById('prodUnit').value.trim(),
+      receiptPrefix: (document.getElementById('prodReceiptPrefix').value.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '') || 'RES'),
       emoji: document.getElementById('prodEmoji').value.trim() || '🛍️',
       image: pendingProdImageData
     };
@@ -813,11 +816,39 @@
     document.getElementById('txImagePreviewWrap').classList.add('hidden');
   });
 
+  function generateNextReceiptNumber(rawPrefix) {
+    const prefix = (String(rawPrefix || 'RES').trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '') || 'RES');
+    const yr = new Date().getFullYear();
+    const head = `${prefix}-${yr}-`;
+    let maxSeq = 0;
+    state.receipts.forEach(r => {
+      if (typeof r.number === 'string' && r.number.startsWith(head)) {
+        const n = parseInt(r.number.slice(head.length), 10);
+        if (!Number.isNaN(n) && n > maxSeq) maxSeq = n;
+      }
+    });
+    return `${head}${String(maxSeq + 1).padStart(3, '0')}`;
+  }
+
+  function resolveReceiptPrefix(productId, fallbackTitle = '') {
+    if (productId) {
+      const p = state.products.find(pr => pr.id === productId);
+      if (p && p.receiptPrefix) return p.receiptPrefix;
+    }
+    if (fallbackTitle) {
+      const low = String(fallbackTitle).toLowerCase();
+      const matched = state.products.find(pr => low.includes(String(pr.name || '').toLowerCase()));
+      if (matched && matched.receiptPrefix) return matched.receiptPrefix;
+    }
+    return (state.profile && state.profile.receiptPrefix) ? state.profile.receiptPrefix : 'RES';
+  }
+
   document.getElementById('txForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const id = document.getElementById('txId').value;
     const activePill = document.querySelector('.type-pill.active');
     const type = activePill ? activePill.dataset.txType : 'expense';
+    const selectedProductId = type === 'income' ? (document.getElementById('txProductSelect').value || '') : '';
 
     const payload = {
       id: id || 'tx_' + Date.now(),
@@ -828,6 +859,7 @@
       category: document.getElementById('txCategory').value,
       accountId: document.getElementById('txAccount').value,
       notes: document.getElementById('txNotes').value.trim(),
+      productId: selectedProductId,
       receiptImg: pendingTxImageData
     };
 
@@ -835,6 +867,9 @@
       const idx = state.transactions.findIndex(t => t.id === id);
       if (idx !== -1) {
         payload.receiptId = state.transactions[idx].receiptId || '';
+        if (!payload.productId && state.transactions[idx].productId) {
+          payload.productId = state.transactions[idx].productId;
+        }
         state.transactions[idx] = payload;
       }
       showToast('Transaksi berjaya dikemaskini.');
@@ -847,9 +882,8 @@
     let autoReceiptId = null;
     const shouldAutoReceipt = type === 'income' && document.getElementById('txAutoReceipt').checked;
     if (shouldAutoReceipt) {
-      const nextSeq = String(state.receipts.length + 1).padStart(3, '0');
-      const prefix = (state.profile.receiptPrefix || 'RES').toUpperCase();
-      const yr = new Date().getFullYear();
+      const prefix = resolveReceiptPrefix(selectedProductId, payload.title);
+      const recNumber = generateNextReceiptNumber(prefix);
       const accName = getAccountName(payload.accountId);
       const methodGuess = accName.toLowerCase().includes('tunai')
         ? 'Tunai'
@@ -857,7 +891,7 @@
 
       const newRec = {
         id: 'rec_' + Date.now(),
-        number: `${prefix}-${yr}-${nextSeq}`,
+        number: recNumber,
         date: payload.date,
         customerName: payload.title,
         customerPhone: '',
@@ -1018,14 +1052,15 @@
       if (name) items.push({ name, qty, price });
     });
 
-    const nextSeq = String(state.receipts.length + 1).padStart(3, '0');
-    const prefix = (state.profile.receiptPrefix || 'RES').toUpperCase();
-    const yr = new Date().getFullYear();
     const linkedTxId = document.getElementById('recLinkedTxId').value;
+    const linkedTxObj = linkedTxId ? state.transactions.find(t => t.id === linkedTxId) : null;
+    const firstItemName = items[0] ? items[0].name : '';
+    const prefix = resolveReceiptPrefix(linkedTxObj ? linkedTxObj.productId : '', linkedTxObj ? linkedTxObj.title : firstItemName);
+    const recNumber = generateNextReceiptNumber(prefix);
 
     const newRec = {
       id: 'rec_' + Date.now(),
-      number: `${prefix}-${yr}-${nextSeq}`,
+      number: recNumber,
       date: document.getElementById('recDate').value,
       customerName: document.getElementById('recCustomerName').value.trim(),
       customerPhone: document.getElementById('recCustomerPhone').value.trim(),
@@ -1422,7 +1457,6 @@
     document.getElementById('profPhone').value = p.phone || '';
     document.getElementById('profEmail').value = p.email || '';
     document.getElementById('profAddress').value = p.address || '';
-    document.getElementById('profReceiptPrefix').value = p.receiptPrefix || 'RES';
     document.getElementById('profBudgetLimit').value = p.monthlyBudget || 0;
   }
 
@@ -1435,7 +1469,6 @@
       phone: document.getElementById('profPhone').value.trim(),
       email: document.getElementById('profEmail').value.trim(),
       address: document.getElementById('profAddress').value.trim(),
-      receiptPrefix: document.getElementById('profReceiptPrefix').value.trim() || 'RES',
       monthlyBudget: parseFloat(document.getElementById('profBudgetLimit').value) || 0
     };
     saveState();
