@@ -523,6 +523,14 @@
                   <label for="profBudgetLimit">Had Bajet Belanja Bulanan (RM)</label>
                   <input type="number" id="profBudgetLimit" class="input" min="0" step="50" />
                 </div>
+                <div class="form-group">
+                  <label for="profLogoInput">Logo Perniagaan (Untuk Bahagian Atas Resit)</label>
+                  <input type="file" id="profLogoInput" class="input file-input" accept="image/*" />
+                  <div id="profLogoPreviewWrap" class="img-preview-wrap hidden">
+                    <img id="profLogoPreview" alt="Pratonton Logo Perniagaan" />
+                    <button type="button" class="btn-xs-danger" id="btnRemoveProfLogo">Buang Logo</button>
+                  </div>
+                </div>
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary">Simpan Profil</button>
                   <button type="button" class="btn btn-soft" id="btnResetDemo">Kosongkan Semua Data</button>
@@ -826,6 +834,6 @@
   <!-- Toast Notification -->
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="app.js?v=6"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>

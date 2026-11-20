@@ -69,6 +69,7 @@
   let currentPreviewReceiptId = null;
   let pendingTxImageData = '';
   let pendingProdImageData = '';
+  let pendingProfileLogo = '';
 
   const FIREBASE_DB_URL = 'https://niagix-default-rtdb.asia-southeast1.firebasedatabase.app';
   const TOKEN_KEY = 'niagakira_token';
@@ -1121,6 +1122,7 @@
     const p = state.profile;
 
     document.getElementById('printableReceiptArea').innerHTML = `
+      ${p.logo ? `<div class="pr-logo-center"><img src="${p.logo}" alt="Logo ${escapeHtml(p.bizName)}" /></div>` : ''}
       <div class="pr-header">
         <div>
           <div class="pr-biz-name">${escapeHtml(p.bizName)}</div>
@@ -1547,7 +1549,32 @@
     document.getElementById('profEmail').value = p.email || '';
     document.getElementById('profAddress').value = p.address || '';
     document.getElementById('profBudgetLimit').value = p.monthlyBudget || 0;
+    pendingProfileLogo = p.logo || '';
+    const logoWrap = document.getElementById('profLogoPreviewWrap');
+    const logoImg = document.getElementById('profLogoPreview');
+    if (pendingProfileLogo) {
+      logoImg.src = pendingProfileLogo;
+      logoWrap.classList.remove('hidden');
+    } else {
+      logoWrap.classList.add('hidden');
+    }
   }
+
+  document.getElementById('profLogoInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    uploadOrKeepImage(file, 450, (url) => {
+      pendingProfileLogo = url;
+      document.getElementById('profLogoPreview').src = url;
+      document.getElementById('profLogoPreviewWrap').classList.remove('hidden');
+    });
+  });
+
+  document.getElementById('btnRemoveProfLogo').addEventListener('click', () => {
+    pendingProfileLogo = '';
+    document.getElementById('profLogoInput').value = '';
+    document.getElementById('profLogoPreviewWrap').classList.add('hidden');
+  });
 
   document.getElementById('bizProfileForm').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -1558,7 +1585,9 @@
       phone: document.getElementById('profPhone').value.trim(),
       email: document.getElementById('profEmail').value.trim(),
       address: document.getElementById('profAddress').value.trim(),
-      monthlyBudget: parseFloat(document.getElementById('profBudgetLimit').value) || 0
+      monthlyBudget: parseFloat(document.getElementById('profBudgetLimit').value) || 0,
+      logo: pendingProfileLogo,
+      receiptPrefix: (state.profile && state.profile.receiptPrefix) || 'RES'
     };
     saveState();
     renderAll();
