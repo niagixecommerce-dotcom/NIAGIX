@@ -893,7 +893,7 @@
         id: 'rec_' + Date.now(),
         number: recNumber,
         date: payload.date,
-        customerName: payload.title,
+        customerName: payload.notes || payload.title,
         customerPhone: '',
         method: methodGuess,
         status: 'paid',
@@ -1005,7 +1005,7 @@
       ? 'Tunai'
       : (accName.includes('wallet') || accName.includes('qr') ? 'DuitNow QR' : 'Pemindahan Bank');
 
-    document.getElementById('recCustomerName').value = saleTx.title;
+    document.getElementById('recCustomerName').value = saleTx.notes || saleTx.title;
     document.getElementById('recDate').value = saleTx.date;
     document.getElementById('recMethod').value = methodGuess;
     document.getElementById('recStatus').value = 'paid';
@@ -1102,6 +1102,17 @@
     previewReceipt(newRec.id);
   });
 
+  function getReceiptRecipientName(rec) {
+    if (rec && rec.linkedTxId) {
+      const linkedTx = state.transactions.find(t => t.id === rec.linkedTxId);
+      const firstItem = rec.items && rec.items[0] ? rec.items[0].name : '';
+      if (linkedTx && linkedTx.notes && (!rec.customerName || rec.customerName === firstItem || rec.customerName === linkedTx.title)) {
+        return linkedTx.notes;
+      }
+    }
+    return (rec && rec.customerName) ? rec.customerName : '-';
+  }
+
   function previewReceipt(recId) {
     const rec = state.receipts.find(r => r.id === recId);
     if (!rec) return;
@@ -1126,7 +1137,7 @@
       </div>
 
       <div style="margin-bottom:12px;font-size:13px;">
-        <strong>Diterima Daripada:</strong> ${escapeHtml(rec.customerName)}
+        <strong>Diterima Daripada:</strong> ${escapeHtml(getReceiptRecipientName(rec))}
         ${rec.customerPhone ? `(${escapeHtml(rec.customerPhone)})` : ''} <br/>
         <strong>Kaedah Bayaran:</strong> ${escapeHtml(rec.method)}
       </div>
@@ -1180,7 +1191,7 @@
       `*RESIT RASMI — ${state.profile.bizName}*`,
       `No. Resit: ${rec.number}`,
       `Tarikh: ${formatDateMY(rec.date)}`,
-      `Pelanggan: ${rec.customerName}`,
+      `Pelanggan: ${getReceiptRecipientName(rec)}`,
       `----------------`,
       ...rec.items.map(i => `• ${i.name} (${i.qty}x) = ${rm(i.qty * i.price)}`),
       `----------------`,
